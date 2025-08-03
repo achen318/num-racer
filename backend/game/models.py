@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import List, Tuple, Optional
 import time
 
 from backend.game import logic
@@ -13,10 +12,10 @@ class Operation(Enum):
 
 
 class OpBounds:
-    def __init__(self, bounds_1: Tuple[int, int], bounds_2: Tuple[int, int]):
+    def __init__(self, bounds_1: tuple[int, int], bounds_2: tuple[int, int]):
         self.bounds_1 = bounds_1
         self.bounds_2 = bounds_2
-    
+
     def __repr__(self) -> str:
         return f"{{{self.bounds_1} x {self.bounds_2}}}"
 
@@ -25,7 +24,7 @@ class Player:
     def __init__(self, name: str):
         self.name = name
         self.score = 0
-        self.current_problem: Optional[Problem] = None
+        self.current_problem: Problem | None = None
 
     def __repr__(self) -> str:
         return f"{self.name} ({self.score}) - {self.current_problem})"
@@ -40,8 +39,8 @@ class Player:
 class Game:
     def __init__(
         self,
-        players: List[Player],
-        operations: List[Operation],
+        players: list[Player],
+        operations: list[Operation],
         add_bounds: OpBounds,  # [min, max] for add & sub
         mul_bounds: OpBounds,  # [min, max] for mul & div
         duration: int,  # total duration in seconds
@@ -63,12 +62,14 @@ class Game:
         while time.time() < end_time:
             for player in self.players:
                 if player.current_problem is None or player.check(5):
-                    player.current_problem = logic.generate_problem(self.operations, self.add_bounds, self.mul_bounds)
-        
+                    player.current_problem = logic.generate_problem(
+                        self.operations, self.add_bounds, self.mul_bounds
+                    )
+
         self.active = False
         # When it sends the first problem, start timer!
         # Javascript listener thing, will call check function each time that the input box is updated by a player.
-        
+
     def __repr__(self) -> str:
         return f"Game(players={self.players}, operations={self.operations}, add_bounds={self.add_bounds}, mul_bounds={self.mul_bounds}, duration={self.duration})"
 

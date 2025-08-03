@@ -1,11 +1,10 @@
 from models import Problem, Operation, OpBounds
 
 import random
-from typing import List
 
 
 def generate_problem(
-    operations: List[Operation],
+    operations: list[Operation],
     add_bounds: OpBounds,
     mul_bounds: OpBounds,
 ) -> Problem:
