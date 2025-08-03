@@ -35,11 +35,11 @@ pip install -r requirements.txt
 To run the FastAPI server in development mode, run the following command in the `backend` directory:
 
 ```bash
-fastapi dev main.py
+fastapi dev
 ```
 
 For production mode, run the following command:
 
 ```bash
-fastapi run main.py
+fastapi run
 ```
