@@ -30,7 +30,6 @@ declare module '$env/static/private' {
 	export const npm_config_user_agent: string;
 	export const GIT_ASKPASS: string;
 	export const npm_node_execpath: string;
-	export const WT_PROFILE_ID: string;
 	export const SHLVL: string;
 	export const npm_config_noproxy: string;
 	export const HOME: string;
@@ -49,6 +48,8 @@ declare module '$env/static/private' {
 	export const npm_config_userconfig: string;
 	export const npm_config_local_prefix: string;
 	export const GOROOT: string;
+	export const PYDEVD_DISABLE_FILE_VALIDATION: string;
+	export const BUNDLED_DEBUGPY_PATH: string;
 	export const npm_config_engine_strict: string;
 	export const WSL_DISTRO_NAME: string;
 	export const COLORTERM: string;
@@ -70,9 +71,9 @@ declare module '$env/static/private' {
 	export const NODE: string;
 	export const npm_package_name: string;
 	export const XDG_RUNTIME_DIR: string;
-	export const WT_SESSION: string;
 	export const DISPLAY: string;
 	export const LANG: string;
+	export const VSCODE_DEBUGPY_ADAPTER_ENDPOINTS: string;
 	export const VSCODE_INJECTION: string;
 	export const LS_COLORS: string;
 	export const TERM_PROGRAM: string;
@@ -132,7 +133,6 @@ declare module '$env/dynamic/private' {
 		npm_config_user_agent: string;
 		GIT_ASKPASS: string;
 		npm_node_execpath: string;
-		WT_PROFILE_ID: string;
 		SHLVL: string;
 		npm_config_noproxy: string;
 		HOME: string;
@@ -151,6 +151,8 @@ declare module '$env/dynamic/private' {
 		npm_config_userconfig: string;
 		npm_config_local_prefix: string;
 		GOROOT: string;
+		PYDEVD_DISABLE_FILE_VALIDATION: string;
+		BUNDLED_DEBUGPY_PATH: string;
 		npm_config_engine_strict: string;
 		WSL_DISTRO_NAME: string;
 		COLORTERM: string;
@@ -172,9 +174,9 @@ declare module '$env/dynamic/private' {
 		NODE: string;
 		npm_package_name: string;
 		XDG_RUNTIME_DIR: string;
-		WT_SESSION: string;
 		DISPLAY: string;
 		LANG: string;
+		VSCODE_DEBUGPY_ADAPTER_ENDPOINTS: string;
 		VSCODE_INJECTION: string;
 		LS_COLORS: string;
 		TERM_PROGRAM: string;

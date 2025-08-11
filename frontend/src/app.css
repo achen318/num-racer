@@ -1,1 +1,23 @@
 @import 'tailwindcss';
+
+@layer base {
+	body {
+		@apply m-16 font-sans;
+	}
+
+	div {
+		@apply mb-4;
+	}
+
+	input {
+		@apply rounded border border-gray-300 px-4 py-2;
+	}
+
+	button {
+		@apply rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600;
+	}
+
+	ul {
+		@apply list-disc pl-5;
+	}
+}
