@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { createRoom, joinRoom } from '$lib/api/rooms';
 	import type { Room } from '$lib/types';
 	import { nonpassive } from 'svelte/legacy';
@@ -11,6 +12,8 @@
 		try {
 			currentRoom = await createRoom();
 			room = currentRoom.id.toString();
+
+			goto(`/match/${currentRoom.id}`);
 		} catch (error) {
 			console.error(`Failed to create room: ${error}`);
 		}
@@ -28,6 +31,8 @@
 					players: currentRoom.players
 				})
 			);
+
+			goto(`/match/${currentRoom.id}`);
 		} catch (error) {
 			console.error(`Failed to join room: ${error}`);
 		}
