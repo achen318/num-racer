@@ -1,17 +1,19 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { getRoom } from '$lib/api/rooms';
-	// import type { Room } from '$lib/types';
+	import type { PageProps } from './$types';
+	import { onMount, onDestroy } from 'svelte';
 
-	// let room: Room | null = null;
-	let room = null;
+	let { data }: PageProps = $props();
+	let ws: WebSocket | null = null;
 
-	onMount(async () => {
-		const response = await getRoom($slug);
-		room = response.data;
+	onMount(() => {
+		// ws = new WebSocket(`ws://localhost:8000/ws/rooms/${data.roomId}`);
+		console.log('Joining');
+	});
+
+	onDestroy(() => {
+		// ws?.close();
+		console.log('Leaving');
 	});
 </script>
 
-<h1>
-	Room {room.id}
-</h1>
+<h1>{data.roomId}</h1>

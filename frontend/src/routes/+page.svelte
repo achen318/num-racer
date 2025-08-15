@@ -2,7 +2,6 @@
 	import { goto } from '$app/navigation';
 	import { createRoom, joinRoom } from '$lib/api/rooms';
 	import type { Room } from '$lib/types';
-	import { nonpassive } from 'svelte/legacy';
 
 	let name = $state<string>('');
 	let room = $state<string>('');
@@ -13,7 +12,7 @@
 			currentRoom = await createRoom();
 			room = currentRoom.id.toString();
 
-			goto(`/match/${currentRoom.id}`);
+			goto(`/rooms/${currentRoom.id}`);
 		} catch (error) {
 			console.error(`Failed to create room: ${error}`);
 		}
@@ -32,7 +31,7 @@
 				})
 			);
 
-			goto(`/match/${currentRoom.id}`);
+			goto(`/rooms/${currentRoom.id}`);
 		} catch (error) {
 			console.error(`Failed to join room: ${error}`);
 		}
