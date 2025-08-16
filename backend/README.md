@@ -43,3 +43,11 @@ For production mode, run the following command:
 ```bash
 fastapi run
 ```
+
+## Test
+
+To run the tests, run:
+
+```bash
+pytest
+```

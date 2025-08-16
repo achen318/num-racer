@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Response, status
 from pydantic import BaseModel
+from app.game.manager import manager
 
 router = APIRouter(
     prefix="/rooms",
@@ -25,7 +26,8 @@ class Room(BaseModel):
 
 @router.get("/")
 def read_rooms() -> list[Room]:
-    return rooms
+    return manager.rooms
+    # return manager.get_rooms()
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)

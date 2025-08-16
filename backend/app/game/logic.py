@@ -1,4 +1,4 @@
-from models import Problem, Operation, OpBounds
+from app.game.state import Problem, Operation, OpBounds
 
 import random
 
