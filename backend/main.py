@@ -1,7 +1,7 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routers import rooms, users
+from app.api.routers import rooms, users
 
 app = FastAPI()
 app.add_middleware(

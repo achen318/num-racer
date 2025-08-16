@@ -1,7 +1,7 @@
 from enum import Enum
 import time
 
-from backend.game import logic
+from backend.app.game import logic
 
 
 class Operation(Enum):
