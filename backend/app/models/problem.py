@@ -2,8 +2,8 @@
 Represents binary arithmetic problems with two operands and an operation.
 """
 
-from enum import StrEnum
 import random
+from enum import StrEnum
 
 from pydantic import BaseModel
 
@@ -112,7 +112,7 @@ class Problem(BaseModel):
             raise ValueError("Divisor cannot have the range [0, 0].")
 
         while mul_problem := cls._generate_mul(bounds):
-            if mul_problem.num2 != 0:
+            if mul_problem.num1 != 0:
                 break
 
         return cls(

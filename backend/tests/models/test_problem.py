@@ -1,5 +1,5 @@
 import pytest
-from app.models.problem import Problem, Operation, OpBounds
+from app.models.problem import OpBounds, Operation, Problem
 
 LOWER = 1
 UPPER = 10
