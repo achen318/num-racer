@@ -46,8 +46,8 @@ fastapi run
 
 ## Test
 
-To run the tests, run:
+To run the tests, first browse to the directory you want to test, then run:
 
 ```bash
-pytest
+pytest -v
 ```

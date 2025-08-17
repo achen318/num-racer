@@ -1,22 +1,4 @@
-from enum import Enum
-
 import app.game.logic
-
-
-class Operation(Enum):
-    ADD = "+"
-    SUB = "-"
-    MUL = "*"
-    DIV = "/"
-
-
-class OpBounds:
-    def __init__(self, bounds_1: tuple[int, int], bounds_2: tuple[int, int]):
-        self.bounds_1 = bounds_1
-        self.bounds_2 = bounds_2
-
-    def __repr__(self) -> str:
-        return f"{{{self.bounds_1} x {self.bounds_2}}}"
 
 
 class Player:
@@ -63,19 +45,8 @@ class Game:
         self.active = False
 
     def __repr__(self) -> str:
-        return f'''Game(players={self.players},
+        return f"""Game(players={self.players},
           operations={self.operations},
             add_bounds={self.add_bounds},
               mul_bounds={self.mul_bounds},
-                duration={self.duration})'''
-
-
-class Problem:
-    def __init__(self, operation: Operation, num1: int, num2: int, answer: int):
-        self.operation = operation
-        self.num1 = num1
-        self.num2 = num2
-        self.answer = answer
-
-    def __repr__(self) -> str:
-        return f"{self.num1} {self.operation.value} {self.num2} = {self.answer}"
+                duration={self.duration})"""
