@@ -27,7 +27,7 @@ class OpBounds(BaseModel):
     bounds_1: tuple[int, int]
     bounds_2: tuple[int, int]
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         return f"{{{self.bounds_1} x {self.bounds_2}}}"
 
 
@@ -42,7 +42,7 @@ class Problem(BaseModel):
     operation: Operation
     result: int
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         return f"{self.num1} {self.operation.value} {self.num2} = {self.result}"
 
     @classmethod
@@ -57,6 +57,10 @@ class Problem(BaseModel):
 
         Returns:
             A Problem instance with the generated operands and operation.
+
+        Raises:
+            ValueError: If the bounds are invalid (i.e. lower > greater) or
+                        equal to 0 for the divisor.
         """
         if operation == Operation.ADD:
             return cls._generate_add(bounds)
@@ -104,7 +108,12 @@ class Problem(BaseModel):
 
     @classmethod
     def _generate_div(cls, bounds: OpBounds):
-        mul_problem = cls._generate_mul(bounds)
+        if bounds.bounds_1 == (0, 0):
+            raise ValueError("Divisor cannot have the range [0, 0].")
+
+        while mul_problem := cls._generate_mul(bounds):
+            if mul_problem.num2 != 0:
+                break
 
         return cls(
             num1=mul_problem.result,
