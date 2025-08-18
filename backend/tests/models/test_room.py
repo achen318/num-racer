@@ -8,7 +8,6 @@ from app.models.room import Room
 @pytest.fixture
 def room() -> Room:
     host = Player(name="Host")
-
     return Room(id="test", host=host, players=[host])
 
 

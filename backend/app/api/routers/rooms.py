@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Response, status
 from pydantic import BaseModel
-from app.game.manager import manager
+from backend.app.models.manager import manager
 
 router = APIRouter(
     prefix="/rooms",

@@ -6,12 +6,12 @@ UPPER = 10
 
 
 @pytest.fixture
-def bounds():
+def bounds() -> OpBounds:
     assert LOWER <= UPPER
     return OpBounds(bounds_1=(LOWER, UPPER), bounds_2=(LOWER, UPPER))
 
 
-def test_generate_add(bounds: OpBounds):
+def test_generate_add(bounds: OpBounds) -> None:
     problem = Problem.generate(Operation.ADD, bounds)
 
     assert problem.operation == Operation.ADD
@@ -20,7 +20,7 @@ def test_generate_add(bounds: OpBounds):
     assert problem.result == problem.num1 + problem.num2
 
 
-def test_generate_sub(bounds: OpBounds):
+def test_generate_sub(bounds: OpBounds) -> None:
     problem = Problem.generate(Operation.SUB, bounds)
 
     assert problem.operation == Operation.SUB
@@ -29,7 +29,7 @@ def test_generate_sub(bounds: OpBounds):
     assert problem.result == problem.num1 - problem.num2
 
 
-def test_generate_mul(bounds: OpBounds):
+def test_generate_mul(bounds: OpBounds) -> None:
     problem = Problem.generate(Operation.MUL, bounds)
 
     assert problem.operation == Operation.MUL
@@ -38,7 +38,7 @@ def test_generate_mul(bounds: OpBounds):
     assert problem.result == problem.num1 * problem.num2
 
 
-def test_generate_div(bounds: OpBounds):
+def test_generate_div(bounds: OpBounds) -> None:
     problem = Problem.generate(Operation.DIV, bounds)
 
     assert problem.operation == Operation.DIV
@@ -48,7 +48,7 @@ def test_generate_div(bounds: OpBounds):
     assert problem.result == problem.num1 / problem.num2
 
 
-def test_invalid_bounds_1():
+def test_invalid_bounds_1() -> None:
     assert LOWER <= UPPER
     bounds = OpBounds(bounds_1=(UPPER, LOWER), bounds_2=(LOWER, UPPER))
 
@@ -65,7 +65,7 @@ def test_invalid_bounds_1():
         Problem.generate(Operation.DIV, bounds)
 
 
-def test_invalid_bounds_2():
+def test_invalid_bounds_2() -> None:
     assert LOWER <= UPPER
     bounds = OpBounds(bounds_1=(LOWER, UPPER), bounds_2=(UPPER, LOWER))
 
@@ -82,7 +82,7 @@ def test_invalid_bounds_2():
         Problem.generate(Operation.DIV, bounds)
 
 
-def test_div_by_zero():
+def test_div_by_zero() -> None:
     assert LOWER <= UPPER
     bounds = OpBounds(bounds_1=(0, 0), bounds_2=(LOWER, UPPER))
 
@@ -90,7 +90,7 @@ def test_div_by_zero():
         Problem.generate(Operation.DIV, bounds)
 
 
-def test_potential_div_by_zero():
+def test_potential_div_by_zero() -> None:
     assert LOWER <= UPPER
     bounds = OpBounds(bounds_1=(0, 1), bounds_2=(LOWER, UPPER))
 

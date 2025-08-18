@@ -4,7 +4,7 @@ from app.models.player import Player
 
 
 @pytest.fixture
-def match():
+def match() -> Match:
     return Match(
         players=[
             Player(name="Alice"),
@@ -14,17 +14,17 @@ def match():
     )
 
 
-def test_start_match(match):
+def test_start_match(match: Match) -> None:
     match.start_match()
     assert match.active is True
 
 
-def test_end_match(match):
+def test_end_match(match: Match) -> None:
     match.end_match()
     assert match.active is False
 
 
-def test_results(match):
+def test_results(match: Match) -> None:
     match.players[0].score = 10
     match.players[1].score = 20
     match.players[2].score = 15
