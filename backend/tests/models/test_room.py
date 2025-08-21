@@ -8,7 +8,7 @@ from app.models.room import Room
 @pytest.fixture
 def room() -> Room:
     host = Player(name="Host")
-    return Room(id="test", host=host, players=[host])
+    return Room(id="test", host=host, players={"Host": host})
 
 
 @pytest.fixture
@@ -32,34 +32,34 @@ def settings() -> MatchSettings:
 
 
 def test_add_player(room: Room, player_1: Player) -> None:
-    assert player_1 not in room.players
+    assert player_1.name not in room.players
     assert room.add_player(player_1)
-    assert player_1 in room.players
+    assert player_1.name in room.players
 
 
 def test_add_existing_player(room: Room, player_1: Player) -> None:
-    assert player_1 not in room.players
+    assert player_1.name not in room.players
 
     assert room.add_player(player_1)
-    assert player_1 in room.players
+    assert player_1.name in room.players
 
     assert not room.add_player(player_1)
-    assert player_1 in room.players
+    assert player_1.name in room.players
 
 
 def test_remove_player(room: Room, player_1: Player) -> None:
     room.add_player(player_1)
-    assert player_1 in room.players
+    assert player_1.name in room.players
 
     assert room.remove_player(player_1)
-    assert player_1 not in room.players
+    assert player_1.name not in room.players
 
 
 def test_remove_nonexistent_player(room: Room, player_1: Player) -> None:
-    assert player_1 not in room.players
+    assert player_1.name not in room.players
 
     assert not room.remove_player(player_1)
-    assert player_1 not in room.players
+    assert player_1.name not in room.players
 
 
 def test_remove_host_and_promote(
@@ -68,16 +68,16 @@ def test_remove_host_and_promote(
     room.add_player(player_1)
     room.add_player(player_2)
 
-    assert room.host == room.players[0]
+    assert room.host == room.players["Host"]
 
-    assert room.remove_player(room.players[0])
+    assert room.remove_player(room.players["Host"])
     assert room.host == player_1
     assert room.host != player_2
 
 
 def test_remove_host_and_delete(room: Room) -> None:
-    assert room.host == room.players[0]
-    assert room.remove_player(room.players[0])
+    assert room.host == room.players["Host"]
+    assert room.remove_player(room.players["Host"])
     assert room.host is None
     assert len(room.players) == 0
 

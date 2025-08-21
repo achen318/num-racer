@@ -6,11 +6,11 @@ from app.models.player import Player
 @pytest.fixture
 def match() -> Match:
     return Match(
-        players=[
-            Player(name="Alice"),
-            Player(name="Bob"),
-            Player(name="Charlie"),
-        ]
+        players={
+            "Alice": Player(name="Alice"),
+            "Bob": Player(name="Bob"),
+            "Charlie": Player(name="Charlie"),
+        }
     )
 
 
@@ -25,9 +25,9 @@ def test_end_match(match: Match) -> None:
 
 
 def test_results(match: Match) -> None:
-    match.players[0].score = 10
-    match.players[1].score = 20
-    match.players[2].score = 15
+    match.players["Alice"].score = 10
+    match.players["Bob"].score = 20
+    match.players["Charlie"].score = 15
 
     match.end_match()
 

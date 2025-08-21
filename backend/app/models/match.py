@@ -37,7 +37,7 @@ class Match(BaseModel):
     Represents a match that occurs in a room.
     """
 
-    players: list[Player] = []
+    players: dict[str, Player] = {}
     settings: MatchSettings = MatchSettings()
     active: bool = True
     result: MatchResult | None = None
@@ -55,6 +55,8 @@ class Match(BaseModel):
         self.active = False
 
         self.result = MatchResult(
-            winner=max(self.players, key=lambda p: p.score),
-            final_scores={player.name: player.score for player in self.players},
+            winner=max(self.players.values(), key=lambda p: p.score),
+            final_scores={
+                player.name: player.score for player in self.players.values()
+            },
         )

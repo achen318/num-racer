@@ -16,7 +16,7 @@ class Player(BaseModel):
     current_problem: Problem | None = None
 
     def __str__(self) -> str:
-        return f"{self.name} ({self.score}) - {self.current_problem})"
+        return f"{self.name} ({self.score}) - {self.current_problem}"
 
     def check(self, answer: int) -> bool:
         """

@@ -1,27 +1,13 @@
 from fastapi import APIRouter, Response, status
-from pydantic import BaseModel
-from backend.app.models.manager import manager
+
+from backend.app.models.manager import Manager
 
 router = APIRouter(
     prefix="/rooms",
     tags=["rooms"],
 )
 
-rooms = []
-
-
-class Player(BaseModel):
-    name: str
-
-
-class Match(BaseModel):
-    status: str
-
-
-class Room(BaseModel):
-    id: int
-    players: list[Player]
-    match: Match | None
+manager = Manager()
 
 
 @router.get("/")

@@ -2,10 +2,9 @@
 Represents rooms where players join and matches take place.
 """
 
-from pydantic import BaseModel
-
 from app.models.match import Match, MatchSettings
 from app.models.player import Player
+from pydantic import BaseModel
 
 
 class Room(BaseModel):
@@ -15,7 +14,7 @@ class Room(BaseModel):
 
     id: str
     host: Player | None
-    players: list[Player] = []
+    players: dict[str, Player] = {}
     match_settings: MatchSettings = MatchSettings()
     current_match: Match | None = None
 
@@ -30,10 +29,10 @@ class Room(BaseModel):
             bool: True if the player was added, False if they were already in
                   the room.
         """
-        if player in self.players:
+        if player.name in self.players:
             return False
 
-        self.players.append(player)
+        self.players[player.name] = player
         return True
 
     def remove_player(self, player: Player) -> bool:
@@ -49,12 +48,14 @@ class Room(BaseModel):
             bool: True if the player was removed, False if they were not in
                   the room.
         """
-        if player not in self.players:
+        if player.name not in self.players:
             return False
 
-        self.players.remove(player)
+        del self.players[player.name]
         if player == self.host:
-            self.host = self.players[0] if self.players else None
+            self.host = (
+                next(iter(self.players.values()), None) if self.players else None
+            )
 
         return True
 
