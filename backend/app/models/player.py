@@ -18,6 +18,21 @@ class Player(BaseModel):
     def __str__(self) -> str:
         return f"{self.name} ({self.score}) - {self.current_problem}"
 
+    def assign_problem(self, problem: Problem) -> None:
+        """
+        Assigns a new problem to the player.
+
+        Args:
+            problem: The problem to assign to the player.
+        """
+        self.current_problem = problem
+
+    def clear_problem(self) -> None:
+        """
+        Clears the current problem for the player.
+        """
+        self.current_problem = None
+
     def check(self, answer: int) -> bool:
         """
         Checks if the given answer is correct for the current problem. Grants
@@ -27,19 +42,10 @@ class Player(BaseModel):
             answer: The player's answer to the current problem.
 
         Returns:
-            bool: True if the answer is correct, False otherwise.
+            True if the answer is correct, False otherwise.
         """
         if self.current_problem and answer == self.current_problem.result:
             self.score += 1
             return True
 
         return False
-
-    def assign_problem(self, problem: Problem) -> None:
-        """
-        Assigns a new problem to the player.
-
-        Args:
-            problem: The problem to assign to the player.
-        """
-        self.current_problem = problem

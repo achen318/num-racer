@@ -1,3 +1,7 @@
+"""
+Represents a manager that handles game rooms and player interactions.
+"""
+
 from app.models.player import Player
 from app.models.room import Room
 from pydantic import BaseModel
@@ -5,7 +9,7 @@ from pydantic import BaseModel
 
 class Manager(BaseModel):
     """
-    Represents a room manager that handles room operations from the server.
+    Represents a manager that handles game rooms and player interactions.
     """
 
     rooms: dict[str, Room] = {}
@@ -37,18 +41,22 @@ class Manager(BaseModel):
             default settings.
         """
         room_id = str(len(self.rooms) + 1)  # TODO: generate unique ID
-        room = Room(id=room_id, host=host)
+        room = Room(id=room_id, host=host, players={host.name: host})
         self.rooms[room_id] = room
         return room
 
-    def delete_room(self, room_id: str) -> None:
+    def delete_room(self, room_id: str) -> bool:
         """
         Deletes the room with the given ID.
 
         Args:
             room_id: The ID of the room to delete.
+
+        Returns:
+            True if the room was deleted successfully, False if the room does
+            not exist.
         """
-        self.rooms.pop(room_id, None)
+        return self.rooms.pop(room_id, None) is not None
 
     def join_room(self, room_id: str, player: Player) -> Room | None:
         """
@@ -68,23 +76,26 @@ class Manager(BaseModel):
 
         return None
 
-    def leave_room(self, room_id: str, player: Player) -> Room | None:
+    def leave_room(self, room_id: str, player: Player) -> bool:
         """
-        Removes a player from the room with the given ID.
+        Removes a player from the room with the given ID. If no more players
+        remain in the room, the room is deleted.
 
         Args:
             room_id: The ID of the room to leave.
             player: The player to remove from the room.
 
         Returns:
-            The Room object that the player left, or None if the leave failed
-            because the room does not exist or the player could not be removed.
+            True if the player was removed successfully, False if the room does
+            not exist or the player could not be removed.
         """
         if room := self.get_room(room_id):
             if room.remove_player(player):
-                return room
+                if not room.players:
+                    self.delete_room(room_id)
+                return True
 
-        return None
+        return False
 
     def start_match(self, room_id: str) -> bool:
         """
@@ -94,7 +105,8 @@ class Manager(BaseModel):
             room_id: The ID of the room to start the match in.
 
         Returns:
-            True if the match was started successfully, False otherwise.
+            True if the match was started successfully, False if the room does
+            not exist or the match could not be started.
         """
         if room := self.get_room(room_id):
             return room.start_match()
@@ -108,7 +120,8 @@ class Manager(BaseModel):
             room_id: The ID of the room to end the match in.
 
         Returns:
-            True if the match was ended successfully, False otherwise.
+            True if the match was ended successfully, False if the room does
+            not exist or the match could not be ended.
         """
         if room := self.get_room(room_id):
             return room.end_match()
@@ -116,7 +129,7 @@ class Manager(BaseModel):
 
     def handle_answer(self, room_id: str, player: Player, answer: int) -> bool:
         """
-        Handles a player's answer to a question in the room.
+        Handles a player's answer to a question in the match.
 
         Args:
             room_id: The ID of the room the player is in.
@@ -125,10 +138,10 @@ class Manager(BaseModel):
 
         Returns:
             True if the answer was correct, False if the answer was incorrect
-            or the room/player does not exist.
+            or the room/match/player does not exist.
         """
         if room := self.get_room(room_id):
-            if plr := room.players.get(player.name):
-                return plr.check(answer)
+            if match := room.current_match:
+                return match.handle_answer(player, answer)
 
         return False

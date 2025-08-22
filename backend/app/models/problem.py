@@ -46,14 +46,17 @@ class Problem(BaseModel):
         return f"{self.num1} {self.operation.value} {self.num2} = {self.result}"
 
     @classmethod
-    def generate(cls, operation: Operation, bounds: OpBounds):
+    def generate(cls, operation: Operation, add_bounds: OpBounds, mul_bounds: OpBounds):
         """
         Generates a problem with the given operation and randomly chosen
         operands within the given bounds.
 
         Args:
             operation: The arithmetic operation to perform.
-            bounds: The bounds within which to generate operands.
+            add_bounds: The bounds within which to generate operands for
+                        addition/subtraction.
+            mul_bounds: The bounds within which to generate operands for
+                        multiplication/division.
 
         Returns:
             A Problem instance with the generated operands and operation.
@@ -63,13 +66,13 @@ class Problem(BaseModel):
                         equal to 0 for the divisor.
         """
         if operation == Operation.ADD:
-            return cls._generate_add(bounds)
+            return cls._generate_add(add_bounds)
         if operation == Operation.SUB:
-            return cls._generate_sub(bounds)
+            return cls._generate_sub(add_bounds)
         if operation == Operation.MUL:
-            return cls._generate_mul(bounds)
+            return cls._generate_mul(mul_bounds)
 
-        return cls._generate_div(bounds)
+        return cls._generate_div(mul_bounds)
 
     @classmethod
     def _generate_add(cls, bounds: OpBounds):

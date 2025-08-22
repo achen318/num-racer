@@ -26,8 +26,8 @@ class Room(BaseModel):
             player: The player to add.
 
         Returns:
-            bool: True if the player was added, False if they were already in
-                  the room.
+            True if the player was added, False if they were already in the
+            room.
         """
         if player.name in self.players:
             return False
@@ -45,8 +45,7 @@ class Room(BaseModel):
             player: The player to remove.
 
         Returns:
-            bool: True if the player was removed, False if they were not in
-                  the room.
+            True if the player was removed, False if they were not in the room.
         """
         if player.name not in self.players:
             return False
@@ -75,8 +74,8 @@ class Room(BaseModel):
         settings.
 
         Returns:
-            bool: True if the match was started successfully, False if there
-                  is already a match in progress.
+            True if the match was started successfully, False if there is
+            already a match in progress.
         """
         if self.current_match:
             return False
@@ -90,8 +89,8 @@ class Room(BaseModel):
         Ends the current match in the room.
 
         Returns:
-            bool: True if the match was ended successfully, False if there
-                  was no match in progress.
+            True if the match was ended successfully, False if there was no
+            match in progress.
         """
         if not self.current_match:
             return False

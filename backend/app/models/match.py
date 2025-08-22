@@ -2,8 +2,10 @@
 Represents matches that occur in a room.
 """
 
+import random
+
 from app.models.player import Player
-from app.models.problem import OpBounds, Operation
+from app.models.problem import OpBounds, Operation, Problem
 from pydantic import BaseModel
 
 
@@ -39,20 +41,43 @@ class Match(BaseModel):
 
     players: dict[str, Player] = {}
     settings: MatchSettings = MatchSettings()
-    active: bool = True
+    active: bool = False
     result: MatchResult | None = None
+
+    def _generate_problem(self) -> Problem:
+        """
+        Generates a new problem based on the current settings.
+        """
+        return Problem.generate(
+            random.choice(self.settings.operations),
+            self.settings.add_bounds,
+            self.settings.mul_bounds,
+        )
 
     def start_match(self) -> None:
         """
-        Starts the match.
+        Starts the match and assigns a new problem to each player.
+
+        Raises:
+            ValueError: If the operations list is empty.
         """
+        if not self.settings.operations:
+            raise ValueError("No operations available to generate problems.")
+
         self.active = True
+
+        for player in self.players.values():
+            player.assign_problem(self._generate_problem())
 
     def end_match(self) -> None:
         """
-        Ends the match and updates the match result.
+        Ends the match, clears each player's problem, and updates the match
+        result.
         """
         self.active = False
+
+        for player in self.players.values():
+            player.clear_problem()
 
         self.result = MatchResult(
             winner=max(self.players.values(), key=lambda p: p.score),
@@ -60,3 +85,22 @@ class Match(BaseModel):
                 player.name: player.score for player in self.players.values()
             },
         )
+
+    def handle_answer(self, player: Player, answer: int) -> bool:
+        """
+        Handles a player's answer to a question in the match by checking the
+        answer and assigning a new problem if the answer is correct.
+
+        Args:
+            player: The player submitting the answer.
+            answer: The answer submitted by the player.
+
+        Returns:
+            True if the answer was correct, False if the answer was incorrect
+            or the player does not exist.
+        """
+        if player.name in self.players and player.check(answer):
+            player.assign_problem(self._generate_problem())
+            return True
+
+        return False
