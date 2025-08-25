@@ -2,6 +2,7 @@
 Represents a manager that handles game rooms and player interactions.
 """
 
+from app.models.match import MatchSettings
 from app.models.player import Player
 from app.models.room import Room
 from pydantic import BaseModel
@@ -58,7 +59,7 @@ class Manager(BaseModel):
         """
         return self.rooms.pop(room_id, None) is not None
 
-    def join_room(self, room_id: str, player: Player) -> Room | None:
+    def add_player(self, room_id: str, player: Player) -> Room | None:
         """
         Adds a player to the room with the given ID.
 
@@ -76,7 +77,7 @@ class Manager(BaseModel):
 
         return None
 
-    def leave_room(self, room_id: str, player: Player) -> bool:
+    def remove_player(self, room_id: str, player: Player) -> bool:
         """
         Removes a player from the room with the given ID. If no more players
         remain in the room, the room is deleted.
@@ -94,6 +95,24 @@ class Manager(BaseModel):
                 if not room.players:
                     self.delete_room(room_id)
                 return True
+
+        return False
+
+    def update_settings(self, room_id: str, settings: MatchSettings) -> bool:
+        """
+        Updates the match settings for the room with the given ID.
+
+        Args:
+            room_id: The ID of the room to update.
+            settings: The new match settings for the room.
+
+        Returns:
+            True if the settings were updated successfully, False if the room
+            does not exist.
+        """
+        if room := self.get_room(room_id):
+            room.update_settings(settings)
+            return True
 
         return False
 

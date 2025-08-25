@@ -1,5 +1,6 @@
 import pytest
 from app.models.manager import Manager
+from app.models.match import MatchSettings
 from app.models.player import Player
 from app.models.problem import OpBounds, Operation
 from app.models.room import Room
@@ -33,6 +34,14 @@ def player_1() -> Player:
 @pytest.fixture
 def player_2() -> Player:
     return Player(name="Bob")
+
+
+@pytest.fixture
+def settings() -> MatchSettings:
+    return MatchSettings(
+        operations=[Operation.SUB],
+        add_bounds=OpBounds(bounds_1=(3, 3), bounds_2=(4, 4)),
+    )
 
 
 def test_create_room(manager: Manager, host: Player) -> None:
@@ -76,45 +85,56 @@ def test_get_rooms_empty(manager: Manager) -> None:
     assert manager.get_rooms() == []
 
 
-def test_join_room(manager: Manager, room: Room, player_1: Player) -> None:
-    assert manager.join_room(room.id, player_1) == room
+def test_add_player(manager: Manager, room: Room, player_1: Player) -> None:
+    assert manager.add_player(room.id, player_1) == room
     assert player_1 in room.players.values()
 
 
-def test_join_nonexistent_room(manager: Manager, player_1: Player) -> None:
-    assert manager.join_room("nonexistent", player_1) is None
+def test_add_player_nonexistent_room(manager: Manager, player_1: Player) -> None:
+    assert manager.add_player("nonexistent", player_1) is None
 
 
-def test_join_room_player_already_in(
+def test_add_player_player_already_in(
     manager: Manager, room: Room, player_1: Player
 ) -> None:
-    assert manager.join_room(room.id, player_1) == room
-    assert manager.join_room(room.id, player_1) is None
+    assert manager.add_player(room.id, player_1) == room
+    assert manager.add_player(room.id, player_1) is None
 
 
-def test_leave_room(manager: Manager, room: Room, player_1: Player) -> None:
-    manager.join_room(room.id, player_1)
+def test_remove_player(manager: Manager, room: Room, player_1: Player) -> None:
+    manager.add_player(room.id, player_1)
 
-    assert manager.leave_room(room.id, player_1) is True
+    assert manager.remove_player(room.id, player_1) is True
     assert player_1.name not in room.players
 
     assert room.id in manager.rooms
 
 
-def test_leave_room_last_player(manager: Manager, room: Room, host: Player) -> None:
-    assert manager.leave_room(room.id, host) is True
+def test_remove_player_last_player(manager: Manager, room: Room, host: Player) -> None:
+    assert manager.remove_player(room.id, host) is True
     assert host.name not in room.players
     assert room.id not in manager.rooms
 
 
-def test_leave_nonexistent_room(manager: Manager, player_1: Player) -> None:
-    assert manager.leave_room("nonexistent", player_1) is False
+def test_remove_player_nonexistent_room(manager: Manager, player_1: Player) -> None:
+    assert manager.remove_player("nonexistent", player_1) is False
 
 
-def test_leave_room_player_not_in(
+def test_remove_player_player_not_in(
     manager: Manager, room: Room, player_1: Player
 ) -> None:
-    assert manager.leave_room(room.id, player_1) is False
+    assert manager.remove_player(room.id, player_1) is False
+
+
+def test_update_settings(manager: Manager, room: Room, settings: MatchSettings) -> None:
+    assert manager.update_settings(room.id, settings) is True
+    assert room.match_settings == settings
+
+
+def test_update_settings_nonexistent_room(
+    manager: Manager, settings: MatchSettings
+) -> None:
+    assert manager.update_settings("nonexistent", settings) is False
 
 
 def test_start_match(manager: Manager, room: Room) -> None:
