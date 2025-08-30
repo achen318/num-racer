@@ -60,17 +60,6 @@ def test_get_nonexistent_room(manager: Manager) -> None:
     assert manager.get_room("nonexistent") is None
 
 
-def test_delete_room(manager: Manager, room: Room) -> None:
-    assert room.id in manager.rooms
-
-    manager.delete_room(room.id)
-    assert room.id not in manager.rooms
-
-
-def test_delete_nonexistent_room(manager: Manager) -> None:
-    assert not manager.delete_room("nonexistent")
-
-
 def test_get_rooms(manager: Manager, player_1: Player, player_2: Player) -> None:
     room1 = manager.create_room(player_1)
     room2 = manager.create_room(player_2)
@@ -83,6 +72,17 @@ def test_get_rooms(manager: Manager, player_1: Player, player_2: Player) -> None
 
 def test_get_rooms_empty(manager: Manager) -> None:
     assert manager.get_rooms() == []
+
+
+def test_delete_room(manager: Manager, room: Room) -> None:
+    assert room.id in manager.rooms
+
+    manager.delete_room(room.id)
+    assert room.id not in manager.rooms
+
+
+def test_delete_nonexistent_room(manager: Manager) -> None:
+    assert not manager.delete_room("nonexistent")
 
 
 def test_add_player(manager: Manager, room: Room, player_1: Player) -> None:
