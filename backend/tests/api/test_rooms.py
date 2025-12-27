@@ -1,8 +1,5 @@
 import pytest
 from app.main import app
-from app.models.player import Player
-from app.models.problem import OpBounds, Operation
-from app.models.room import Room
 from fastapi.testclient import TestClient
 
 
@@ -13,7 +10,40 @@ def client() -> TestClient:
 
 @pytest.fixture
 def room(client: TestClient) -> dict:
-    return client.post("/rooms/", params={"host": "Host"}).json()
+    my_room = client.post("/rooms/", params={"host": "Host"}).json()
+
+    client.post(
+        f"/rooms/update_settings/{my_room['id']}",
+        json={
+            "operations": ["+"],
+            "add_bounds": {"bounds_1": [1, 1], "bounds_2": [2, 2]},
+        },
+    )
+
+    return client.get(f"/rooms/{my_room['id']}").json()
+
+
+@pytest.fixture
+def host() -> dict:
+    return {"player": "Host"}
+
+
+@pytest.fixture
+def player_1() -> dict:
+    return {"player": "Alice"}
+
+
+@pytest.fixture
+def player_2() -> dict:
+    return {"player": "Bob"}
+
+
+@pytest.fixture
+def settings() -> dict:
+    return {
+        "operations": ["-"],
+        "add_bounds": {"bounds_1": [3, 3], "bounds_2": [4, 4]},
+    }
 
 
 def test_create_room(client: TestClient) -> None:
@@ -34,7 +64,6 @@ def test_get_nonexistent_room(client: TestClient) -> None:
     res = client.get("/rooms/nonexistent")
 
     assert res.status_code == 404
-    assert res.json() is None
 
 
 def test_get_rooms(client: TestClient) -> None:
@@ -56,106 +85,97 @@ def test_delete_nonexistent_room(client: TestClient) -> None:
     assert res.status_code == 404
 
 
-def test_add_player(client: TestClient, room: dict) -> None:
-    res = client.post(f"/rooms/add/{room['id']}", params={"player": "Alice"})
+def test_add_player(client: TestClient, room: dict, player_1: dict) -> None:
+    res = client.post(f"/rooms/add/{room['id']}", params=player_1)
 
     assert res.status_code == 200
     assert res.json() is not None
 
 
-def test_add_player_nonexistent_room(client: TestClient) -> None:
-    res = client.post("/rooms/add/nonexistent", params={"player": "Alice"})
+def test_add_player_nonexistent_room(client: TestClient, player_1: dict) -> None:
+    res = client.post("/rooms/add/nonexistent", params=player_1)
 
     assert res.status_code == 404
-    assert res.json() is None
 
 
-def test_add_player_already_in(client: TestClient, room: dict) -> None:
-    res = client.post(f"/rooms/add/{room['id']}", params={"player": "Alice"})
+def test_add_player_already_in(client: TestClient, room: dict, player_1: dict) -> None:
+    res = client.post(f"/rooms/add/{room['id']}", params=player_1)
     assert res.status_code == 200
     assert res.json() is not None
 
-    res = client.post(f"/rooms/add/{room['id']}", params={"player": "Alice"})
+    res = client.post(f"/rooms/add/{room['id']}", params=player_1)
     assert res.status_code == 404
-    assert res.json() is None
 
 
-def test_remove_player(client: TestClient, room: dict) -> None:
-    res = client.post(f"/rooms/add/{room['id']}", params={"player": "Alice"})
+def test_remove_player(client: TestClient, room: dict, player_1: dict) -> None:
+    res = client.post(f"/rooms/add/{room['id']}", params=player_1)
     assert res.status_code == 200
     assert res.json() is not None
 
-    res = client.post(f"/rooms/remove/{room['id']}", params={"player": "Alice"})
-    assert res.status_code == 200
+    res = client.post(f"/rooms/remove/{room['id']}", params=player_1)
+    assert res.status_code == 204
+
+
+def test_remove_player_last_player(client: TestClient, room: dict, host: dict) -> None:
+    res = client.post(f"/rooms/remove/{room['id']}", params=host)
+    assert res.status_code == 204
+
+    res = client.get(f"/rooms/{room['id']}")
+    assert res.status_code == 404
+
+
+def test_remove_player_nonexistent_room(client: TestClient, player_1: dict) -> None:
+    res = client.post("/rooms/remove/nonexistent", params=player_1)
+
+    assert res.status_code == 404
+
+
+def test_update_settings(client: TestClient, room: dict, settings: dict) -> None:
+    res = client.post(f"/rooms/update_settings/{room['id']}", json=settings)
+
+    assert res.status_code == 204
+
+
+def test_update_settings_nonexistent_room(client: TestClient, settings: dict) -> None:
+    res = client.post("/rooms/update_settings/nonexistent", json=settings)
+
+    assert res.status_code == 404
+
+
+def test_start_match(client: TestClient, room: dict) -> None:
+    res = client.post(f"/rooms/start/{room['id']}")
+
+    assert res.status_code == 201
     assert res.json() is None
 
 
-# def test_leave_room_last_player(manager: Manager, room: Room, host: Player) -> None:
-#     assert manager.leave_room(room.id, host) is True
-#     assert host.name not in room.players
-#     assert room.id not in manager.rooms
+def test_start_match_nonexistent_room(client: TestClient) -> None:
+    res = client.post("/rooms/start/nonexistent")
+
+    assert res.status_code == 404
 
 
-# def test_leave_nonexistent_room(manager: Manager, player_1: Player) -> None:
-#     assert manager.leave_room("nonexistent", player_1) is False
+def test_start_match_already_started(client: TestClient, room: dict) -> None:
+    client.post(f"/rooms/start/{room['id']}")
+    res = client.post(f"/rooms/start/{room['id']}")
+
+    assert res.status_code == 404
 
 
-# def test_leave_room_player_not_in(
-#     manager: Manager, room: Room, player_1: Player
-# ) -> None:
-#     assert manager.leave_room(room.id, player_1) is False
+def test_end_match(client: TestClient, room: dict) -> None:
+    client.post(f"/rooms/start/{room['id']}")
+    res = client.post(f"/rooms/end/{room['id']}")
+
+    assert res.status_code == 204
 
 
-# def test_start_match(manager: Manager, room: Room) -> None:
-#     assert manager.start_match(room.id) is True
+def test_end_match_nonexistent_room(client: TestClient) -> None:
+    res = client.post("/rooms/end/nonexistent")
+
+    assert res.status_code == 404
 
 
-# def test_start_match_nonexistent_room(manager: Manager) -> None:
-#     assert manager.start_match("nonexistent") is False
+def test_end_match_already_ended(client: TestClient, room: dict) -> None:
+    res = client.post(f"/rooms/end/{room['id']}")
 
-
-# def test_start_match_already_started(manager: Manager, room: Room) -> None:
-#     manager.start_match(room.id)
-#     assert manager.start_match(room.id) is False
-
-
-# def test_end_match(manager: Manager, room: Room) -> None:
-#     manager.start_match(room.id)
-#     assert manager.end_match(room.id) is True
-
-
-# def test_end_match_nonexistent_room(manager: Manager) -> None:
-#     assert manager.end_match("nonexistent") is False
-
-
-# def test_end_match_already_ended(manager: Manager, room: Room) -> None:
-#     manager.start_match(room.id)
-#     manager.end_match(room.id)
-#     assert manager.end_match(room.id) is False
-
-
-# def test_handle_answer_correct(manager: Manager, room: Room, host: Player) -> None:
-#     manager.start_match(room.id)
-#     assert manager.handle_answer(room.id, host, 3) is True
-
-
-# def test_handle_answer_incorrect(manager: Manager, room: Room, host: Player) -> None:
-#     manager.start_match(room.id)
-#     assert manager.handle_answer(room.id, host, 0) is False
-
-
-# def test_handle_answer_nonexistent_room(manager: Manager, host: Player) -> None:
-#     assert manager.handle_answer("nonexistent", host, 0) is False
-
-
-# def test_handle_answer_nonexistent_match(
-#     manager: Manager, room: Room, host: Player
-# ) -> None:
-#     assert manager.handle_answer(room.id, host, 0) is False
-
-
-# def test_handle_answer_nonexistent_player(
-#     manager: Manager, room: Room, player_1: Player
-# ) -> None:
-#     manager.start_match(room.id)
-#     assert manager.handle_answer(room.id, player_1, 0) is False
+    assert res.status_code == 404

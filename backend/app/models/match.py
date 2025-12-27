@@ -86,7 +86,7 @@ class Match(BaseModel):
             },
         )
 
-    def handle_answer(self, player: Player, answer: int) -> bool:
+    def handle_answer(self, player: Player, answer: int) -> bool | None:
         """
         Handles a player's answer to a question in the match by checking the
         answer and assigning a new problem if the answer is correct.
@@ -97,10 +97,14 @@ class Match(BaseModel):
 
         Returns:
             True if the answer was correct, False if the answer was incorrect
-            or the player does not exist.
+            or None if the player does not exist.
         """
-        if player.name in self.players and player.check(answer):
-            player.assign_problem(self._generate_problem())
-            return True
+        if player.name in self.players:
+            match_player = self.players[player.name]
+            if match_player.check(answer):
+                match_player.assign_problem(self._generate_problem())
+                return True
 
-        return False
+            return False
+
+        return None

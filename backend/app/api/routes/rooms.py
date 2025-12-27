@@ -1,8 +1,12 @@
+"""
+Contains all room-related API routes.
+"""
+
 from app.models.manager import Manager
 from app.models.match import MatchSettings
 from app.models.player import Player
 from app.models.room import Room
-from fastapi import APIRouter, Response, status
+from fastapi import APIRouter, HTTPException, status
 
 router = APIRouter(
     prefix="/rooms",
@@ -12,69 +16,154 @@ router = APIRouter(
 manager = Manager()
 
 
-@router.get("/{room_id}")
-def get_room(room_id: str, response: Response) -> Room | None:
+ROOM_NOT_FOUND = HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND,
+    detail="Room not found",
+)
+
+
+@router.get(
+    "/{room_id}",
+    response_model=Room,
+    responses={404: {"description": "Room not found"}},
+)
+def get_room(room_id: str) -> Room:
+    """
+    Returns the room with the given ID.
+    """
     if room := manager.get_room(room_id):
         return room
 
-    response.status_code = status.HTTP_404_NOT_FOUND
-    return None
+    raise ROOM_NOT_FOUND
 
 
-@router.get("/")
+@router.get("/", response_model=list[Room])
 def get_rooms() -> list[Room]:
+    """
+    Returns a list of all active rooms.
+    """
     return manager.get_rooms()
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/",
+    status_code=status.HTTP_201_CREATED,
+    response_model=Room,
+    responses={
+        201: {"description": "Room created successfully"},
+    },
+)
 def create_room(host: str) -> Room:
+    """
+    Creates a new room with the given player as the host.
+    """
     return manager.create_room(Player(name=host))
 
 
-@router.delete("/{room_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_room(room_id: str, response: Response) -> None:
+@router.delete(
+    "/{room_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={
+        204: {"description": "Room deleted successfully"},
+        404: {"description": "Room not found"},
+    },
+)
+def delete_room(room_id: str) -> None:
+    """
+    Deletes the room with the given ID.
+    """
     if manager.delete_room(room_id):
-        return
+        return None
 
-    response.status_code = status.HTTP_404_NOT_FOUND
+    raise ROOM_NOT_FOUND
 
 
-@router.post("/add/{room_id}")
-def add_player(room_id: str, player: str, response: Response) -> Room | None:
+@router.post(
+    "/add/{room_id}",
+    response_model=Room,
+    responses={404: {"description": "Room or player not found"}},
+)
+def add_player(room_id: str, player: str) -> Room:
+    """
+    Adds a player to the room with the given ID.
+    """
     if room := manager.add_player(room_id, Player(name=player)):
         return room
 
-    response.status_code = status.HTTP_404_NOT_FOUND
-    return None
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Room or player not found",
+    )
 
 
-@router.post("/remove/{room_id}")
-def remove_player(room_id: str, player: str, response: Response) -> None:
+@router.post(
+    "/remove/{room_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={
+        204: {"description": "Player removed successfully"},
+        404: {"description": "Room not found"},
+    },
+)
+def remove_player(room_id: str, player: str) -> None:
+    """
+    Removes a player from the room with the given ID. If no more players
+    remain in the room, the room is deleted.
+    """
     if manager.remove_player(room_id, Player(name=player)):
-        return
+        return None
 
-    response.status_code = status.HTTP_404_NOT_FOUND
-
-
-@router.post("/update_settings/{room_id}")
-def update_settings(room_id: str, settings: dict, response: Response) -> None:
-    if manager.update_settings(room_id, settings):
-        return
-
-    response.status_code = status.HTTP_404_NOT_FOUND
+    raise ROOM_NOT_FOUND
 
 
-@router.post("/start/{room_id}", status_code=status.HTTP_201_CREATED)
-def start_match(room_id: str, response: Response) -> None:
+@router.post(
+    "/update_settings/{room_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={
+        204: {"description": "Settings updated successfully"},
+        404: {"description": "Room not found"},
+    },
+)
+def update_settings(room_id: str, settings: dict) -> None:
+    """
+    Update the match settings for the room with the given ID.
+    """
+    if manager.update_settings(room_id, MatchSettings(**settings)):
+        return None
+
+    raise ROOM_NOT_FOUND
+
+
+@router.post(
+    "/start/{room_id}",
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        201: {"description": "Match started successfully"},
+        404: {"description": "Room not found"},
+    },
+)
+def start_match(room_id: str) -> None:
+    """
+    Starts the match for the room with the given ID.
+    """
     if manager.start_match(room_id):
-        return
+        return None
 
-    response.status_code = status.HTTP_404_NOT_FOUND
+    raise ROOM_NOT_FOUND
 
 
-@router.post("/end/{room_id}", status_code=status.HTTP_204_NO_CONTENT)
-def end_match(room_id: str, response: Response) -> None:
+@router.post(
+    "/end/{room_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={
+        204: {"description": "Match ended successfully"},
+        404: {"description": "Room not found"},
+    },
+)
+def end_match(room_id: str) -> None:
+    """
+    Ends the match for the room with the given ID.
+    """
     if manager.end_match(room_id):
-        return
+        return None
 
-    response.status_code = status.HTTP_404_NOT_FOUND
+    raise ROOM_NOT_FOUND

@@ -146,7 +146,7 @@ class Manager(BaseModel):
             return room.end_match()
         return False
 
-    def handle_answer(self, room_id: str, player: Player, answer: int) -> bool:
+    def handle_answer(self, room_id: str, player: Player, answer: int) -> bool | None:
         """
         Handles a player's answer to a question in the match.
 
@@ -156,11 +156,11 @@ class Manager(BaseModel):
             answer: The answer submitted by the player.
 
         Returns:
-            True if the answer was correct, False if the answer was incorrect
-            or the room/match/player does not exist.
+            True if the answer was correct, False if the answer was incorrect,
+            or None if the room/match/player does not exist.
         """
         if room := self.get_room(room_id):
             if match := room.current_match:
                 return match.handle_answer(player, answer)
 
-        return False
+        return None

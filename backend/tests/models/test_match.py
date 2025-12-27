@@ -88,4 +88,4 @@ def test_handle_answer_nonexistent_player(match: Match) -> None:
     match.start_match()
 
     nonexistent_player = Player(name="nonexistent")
-    assert match.handle_answer(nonexistent_player, 5) is False
+    assert match.handle_answer(nonexistent_player, 5) is None

@@ -176,17 +176,17 @@ def test_handle_answer_incorrect(manager: Manager, room: Room, host: Player) -> 
 
 
 def test_handle_answer_nonexistent_room(manager: Manager, host: Player) -> None:
-    assert manager.handle_answer("nonexistent", host, 0) is False
+    assert manager.handle_answer("nonexistent", host, 0) is None
 
 
 def test_handle_answer_nonexistent_match(
     manager: Manager, room: Room, host: Player
 ) -> None:
-    assert manager.handle_answer(room.id, host, 0) is False
+    assert manager.handle_answer(room.id, host, 0) is None
 
 
 def test_handle_answer_nonexistent_player(
     manager: Manager, room: Room, player_1: Player
 ) -> None:
     manager.start_match(room.id)
-    assert manager.handle_answer(room.id, player_1, 0) is False
+    assert manager.handle_answer(room.id, player_1, 0) is None
