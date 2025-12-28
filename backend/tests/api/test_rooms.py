@@ -179,3 +179,55 @@ def test_end_match_already_ended(client: TestClient, room: dict) -> None:
     res = client.post(f"/rooms/end/{room['id']}")
 
     assert res.status_code == 404
+
+
+def test_handle_answer_correct(client: TestClient, room: dict, host: dict) -> None:
+    client.post(f"/rooms/start/{room['id']}")
+    res = client.post(
+        f"/rooms/answer/{room['id']}",
+        params=host | {"answer": 3},
+    )
+
+    assert res.status_code == 200
+    assert res.json() is True
+
+
+def test_handle_answer_incorrect(client: TestClient, room: dict, host: dict) -> None:
+    client.post(f"/rooms/start/{room['id']}")
+    res = client.post(
+        f"/rooms/answer/{room['id']}",
+        params=host | {"answer": 0},
+    )
+
+    assert res.status_code == 200
+    assert res.json() is False
+
+
+def test_handle_answer_nonexistent_room(client: TestClient, host: dict) -> None:
+    res = client.post(
+        "/rooms/answer/nonexistent",
+        params=host | {"answer": 0},
+    )
+
+    assert res.status_code == 404
+
+
+def test_handle_answer_nonexistent_match(
+    client: TestClient, room: dict, host: dict
+) -> None:
+    res = client.post(
+        f"/rooms/answer/{room['id']}",
+        params=host | {"answer": 0},
+    )
+
+    assert res.status_code == 404
+
+
+def test_handle_answer_nonexistent_player(client: TestClient, room: dict) -> None:
+    client.post(f"/rooms/start/{room['id']}")
+    res = client.post(
+        f"/rooms/answer/{room['id']}",
+        params={"player": "Nonexistent", "answer": 0},
+    )
+
+    assert res.status_code == 404

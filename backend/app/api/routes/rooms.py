@@ -8,11 +8,7 @@ from app.models.player import Player
 from app.models.room import Room
 from fastapi import APIRouter, HTTPException, status
 
-router = APIRouter(
-    prefix="/rooms",
-    tags=["rooms"],
-)
-
+router = APIRouter(prefix="/rooms", tags=["room"])
 manager = Manager()
 
 
@@ -167,3 +163,23 @@ def end_match(room_id: str) -> None:
         return None
 
     raise ROOM_NOT_FOUND
+
+
+@router.post(
+    "/answer/{room_id}",
+    responses={
+        404: {"description": "Room, match, or player not found"},
+    },
+)
+def handle_answer(room_id: str, player: str, answer: int) -> bool:
+    """
+    Handles a player's answer for the room with the given ID."""
+    verdict = manager.handle_answer(room_id, Player(name=player), answer)
+
+    if verdict is not None:
+        return verdict
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Room, match, or player not found",
+    )
