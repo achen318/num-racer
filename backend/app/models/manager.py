@@ -30,7 +30,7 @@ class Manager(BaseModel):
         """
         return list(self.rooms.values())
 
-    def create_room(self, host: Player) -> Room:
+    def create_room(self, host: Player) -> str:
         """
         Creates a new room with the given player as the host.
 
@@ -38,13 +38,12 @@ class Manager(BaseModel):
             host: The player to create the room to serve as the room host.
 
         Returns:
-            A Room object representing the newly created room, with the
-            default settings.
+            The ID of the newly created room with the given host and default
+            settings.
         """
         room_id = str(len(self.rooms) + 1)  # TODO: generate unique ID
-        room = Room(id=room_id, host=host, players={host.name: host})
-        self.rooms[room_id] = room
-        return room
+        self.rooms[room_id] = Room(id=room_id, host=host, players={host.name: host})
+        return room_id
 
     def delete_room(self, room_id: str) -> bool:
         """
@@ -59,7 +58,7 @@ class Manager(BaseModel):
         """
         return self.rooms.pop(room_id, None) is not None
 
-    def add_player(self, room_id: str, player: Player) -> Room | None:
+    def add_player(self, room_id: str, player: Player) -> bool:
         """
         Adds a player to the room with the given ID.
 
@@ -68,14 +67,14 @@ class Manager(BaseModel):
             player: The player to add to the room.
 
         Returns:
-            The Room object that the player joined, or None if the join failed
-            because the room does not exist or the player could not be added.
+            True if the player was added successfully, False if the room does
+            not exist or the player could not be added.
         """
         if room := self.get_room(room_id):
             if room.add_player(player):
-                return room
+                return True
 
-        return None
+        return False
 
     def remove_player(self, room_id: str, player: Player) -> bool:
         """

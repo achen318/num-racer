@@ -44,12 +44,11 @@ def get_rooms() -> list[Room]:
 @router.post(
     "/",
     status_code=status.HTTP_201_CREATED,
-    response_model=Room,
     responses={
         201: {"description": "Room created successfully"},
     },
 )
-def create_room(host: str) -> Room:
+def create_room(host: str) -> str:
     """
     Creates a new room with the given player as the host.
     """
@@ -76,15 +75,14 @@ def delete_room(room_id: str) -> None:
 
 @router.post(
     "/add/{room_id}",
-    response_model=Room,
     responses={404: {"description": "Room or player not found"}},
 )
-def add_player(room_id: str, player: str) -> Room:
+def add_player(room_id: str, player: str) -> bool:
     """
     Adds a player to the room with the given ID.
     """
-    if room := manager.add_player(room_id, Player(name=player)):
-        return room
+    if manager.add_player(room_id, Player(name=player)):
+        return True
 
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,

@@ -13,7 +13,9 @@ def manager() -> Manager:
 
 @pytest.fixture
 def room(manager: Manager, host: Player) -> Room:
-    rm = manager.create_room(host)
+    room_id = manager.create_room(host)
+    rm = manager.get_room(room_id)
+    assert rm is not None
 
     rm.match_settings.operations = [Operation.ADD]
     rm.match_settings.add_bounds = OpBounds(bounds_1=(1, 1), bounds_2=(2, 2))
@@ -44,14 +46,6 @@ def settings() -> MatchSettings:
     )
 
 
-def test_create_room(manager: Manager, host: Player) -> None:
-    room = manager.create_room(host)
-
-    assert room.id in manager.rooms
-    assert room.host == host
-    assert room.players == {host.name: host}
-
-
 def test_get_room(manager: Manager, room: Room) -> None:
     assert manager.get_room(room.id) == room
 
@@ -60,9 +54,17 @@ def test_get_nonexistent_room(manager: Manager) -> None:
     assert manager.get_room("nonexistent") is None
 
 
+def test_create_room(manager: Manager, host: Player) -> None:
+    room_id = manager.create_room(host)
+
+    assert room_id in manager.rooms
+    assert manager.rooms[room_id].host == host
+    assert manager.rooms[room_id].players == {host.name: host}
+
+
 def test_get_rooms(manager: Manager, player_1: Player, player_2: Player) -> None:
-    room1 = manager.create_room(player_1)
-    room2 = manager.create_room(player_2)
+    room1 = manager.rooms[manager.create_room(player_1)]
+    room2 = manager.rooms[manager.create_room(player_2)]
 
     rooms = manager.get_rooms()
     assert len(rooms) == 2
@@ -86,19 +88,19 @@ def test_delete_nonexistent_room(manager: Manager) -> None:
 
 
 def test_add_player(manager: Manager, room: Room, player_1: Player) -> None:
-    assert manager.add_player(room.id, player_1) == room
+    assert manager.add_player(room.id, player_1) is True
     assert player_1 in room.players.values()
 
 
 def test_add_player_nonexistent_room(manager: Manager, player_1: Player) -> None:
-    assert manager.add_player("nonexistent", player_1) is None
+    assert manager.add_player("nonexistent", player_1) is False
 
 
 def test_add_player_player_already_in(
     manager: Manager, room: Room, player_1: Player
 ) -> None:
-    assert manager.add_player(room.id, player_1) == room
-    assert manager.add_player(room.id, player_1) is None
+    assert manager.add_player(room.id, player_1) is True
+    assert manager.add_player(room.id, player_1) is False
 
 
 def test_remove_player(manager: Manager, room: Room, player_1: Player) -> None:

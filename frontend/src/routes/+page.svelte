@@ -1,66 +1,45 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { createRoom, joinRoom } from '$lib/api/rooms';
-	import type { Room } from '$lib/types';
+	import { createRoom, addPlayer } from '$lib/api/rooms';
 
 	let name = $state<string>('');
 	let room = $state<string>('');
-	let currentRoom = $state<Room | null>(null);
+
+	// ws.onmessage = (event) => {
+	// 	const data = JSON.parse(event.data);
+
+	// 	if (data.type === 'room_update' && currentRoom && currentRoom.id === data.roomId) {
+	// 		currentRoom.players = data.players;
+	// 	}
+	// };
 
 	async function handleCreateRoom() {
 		try {
-			currentRoom = await createRoom();
-			room = currentRoom.id.toString();
-
-			goto(`/rooms/${currentRoom.id}`);
+			const roomId = await createRoom(name);
+			goto(`/rooms/${roomId}`);
 		} catch (error) {
-			console.error(`Failed to create room: ${error}`);
+			console.error(`Failed to create room. ${error.message}`);
 		}
 	}
 
 	async function handleJoinRoom() {
 		try {
-			currentRoom = await joinRoom(parseInt(room), name);
+			await addPlayer(room, name);
 
-			ws.send(
-				JSON.stringify({
-					type: 'room_update',
-					roomId: currentRoom.id,
-					playerName: name,
-					players: currentRoom.players
-				})
-			);
+			// ws.send(
+			// 	JSON.stringify({
+			// 		type: 'room_update',
+			// 		roomId: currentRoom.id,
+			// 		playerName: name,
+			// 		players: currentRoom.players
+			// 	})
+			// );
 
-			goto(`/rooms/${currentRoom.id}`);
+			goto(`/rooms/${room}`);
 		} catch (error) {
-			console.error(`Failed to join room: ${error}`);
+			console.error(`Failed to join room. ${error.message}`);
 		}
 	}
-
-	const ws = new WebSocket(`ws://localhost:8000/ws/Player ${Math.floor(Math.random() * 15)}`);
-	let message = $state<string>('');
-	let messages = $state<string[]>([]);
-
-	function sendMessage() {
-		ws.send(
-			JSON.stringify({
-				type: 'public_chat_message',
-				playerName: name,
-				message: message
-			})
-		);
-		message = '';
-	}
-
-	ws.onmessage = (event) => {
-		const data = JSON.parse(event.data);
-
-		if (data.type === 'room_update' && currentRoom && currentRoom.id === data.roomId) {
-			currentRoom.players = data.players;
-		} else if (data.type === 'public_chat_message') {
-			messages.push(`${data.playerName}: ${data.message}`);
-		}
-	};
 </script>
 
 <div>
@@ -76,27 +55,4 @@
 <div>
 	<button onclick={handleCreateRoom}>Create Room</button>
 	<button onclick={handleJoinRoom}>Join Room</button>
-</div>
-
-{#if currentRoom}
-	<div>
-		<h1>Room {currentRoom.id}</h1>
-		<ul>
-			{#each currentRoom.players as player}
-				<li>{player.name}</li>
-			{/each}
-		</ul>
-	</div>
-{/if}
-
-<div>
-	<h1>WebSocket Chat</h1>
-	<input type="text" name="message" bind:value={message} />
-	<button onclick={sendMessage}>Send</button>
-
-	<ul>
-		{#each messages as msg}
-			<li>{msg}</li>
-		{/each}
-	</ul>
 </div>

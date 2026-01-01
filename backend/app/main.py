@@ -41,11 +41,11 @@ async def websocket_endpoint(websocket: WebSocket, player: str):
     await manager.connect(websocket)
 
     try:
-        # await manager.broadcast(f"{player} joined the chat")
+        await manager.broadcast(f"{player} joined the chat")
 
         while True:
             data = await websocket.receive_text()
             await manager.broadcast(data)
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-        # await manager.broadcast(f"{player} left the chat")
+        await manager.broadcast(f"{player} left the chat")

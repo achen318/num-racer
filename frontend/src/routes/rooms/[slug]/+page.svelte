@@ -1,12 +1,14 @@
 <script lang="ts">
-	import type { PageProps } from './$types';
 	import { onMount, onDestroy } from 'svelte';
+	import type { PageData } from './$types';
 
-	let { data }: PageProps = $props();
-	let ws: WebSocket | null = null;
+	export let data: PageData;
+	const { room } = data;
+
+	// let ws: WebSocket | null = null;
 
 	onMount(() => {
-		// ws = new WebSocket(`ws://localhost:8000/ws/rooms/${data.roomId}`);
+		// ws = new WebSocket(`ws://localhost:8000/ws/Player ${Math.floor(Math.random() * 15)}`);
 		console.log('Joining');
 	});
 
@@ -16,4 +18,10 @@
 	});
 </script>
 
-<h1>{data.roomId}</h1>
+<h1>Room {room.id}</h1>
+
+<ul>
+	{#each Object.values(room.players) as player}
+		<li>{player.name}</li>
+	{/each}
+</ul>

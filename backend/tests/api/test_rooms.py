@@ -10,17 +10,17 @@ def client() -> TestClient:
 
 @pytest.fixture
 def room(client: TestClient) -> dict:
-    my_room = client.post("/rooms/", params={"host": "Host"}).json()
+    room_id = client.post("/rooms/", params={"host": "Host"}).json()
 
     client.post(
-        f"/rooms/update_settings/{my_room['id']}",
+        f"/rooms/update_settings/{room_id}",
         json={
             "operations": ["+"],
             "add_bounds": {"bounds_1": [1, 1], "bounds_2": [2, 2]},
         },
     )
 
-    return client.get(f"/rooms/{my_room['id']}").json()
+    return client.get(f"/rooms/{room_id}").json()
 
 
 @pytest.fixture
