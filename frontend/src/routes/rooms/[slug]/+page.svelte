@@ -3,18 +3,16 @@
 	import type { PageData } from './$types';
 
 	export let data: PageData;
-	const { room } = data;
+	const { room, player } = data;
 
-	// let ws: WebSocket | null = null;
+	let ws: WebSocket | null = null;
 
 	onMount(() => {
-		// ws = new WebSocket(`ws://localhost:8000/ws/Player ${Math.floor(Math.random() * 15)}`);
-		console.log('Joining');
+		ws = new WebSocket(`ws://localhost:8000/ws/${room.id}/${player}`);
 	});
 
 	onDestroy(() => {
-		// ws?.close();
-		console.log('Leaving');
+		ws?.close();
 	});
 </script>
 
